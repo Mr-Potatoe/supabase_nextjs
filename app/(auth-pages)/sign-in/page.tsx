@@ -1,6 +1,6 @@
-import { signInAction } from "@/app/actions";
+// import { signInAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
+// import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -21,12 +21,12 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
         <Input name="email" placeholder="you@example.com" required />
         <div className="flex justify-between items-center">
           <Label htmlFor="password">Password</Label>
-          <Link
+          {/* <Link
             className="text-xs text-foreground underline"
             href="/forgot-password"
           >
             Forgot Password?
-          </Link>
+          </Link> */}
         </div>
         <Input
           type="password"
@@ -34,9 +34,9 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           placeholder="Your password"
           required
         />
-        <SubmitButton pendingText="Signing In..." formAction={signInAction}>
+        {/* <SubmitButton pendingText="Signing In..." formAction={signInAction}>
           Sign in
-        </SubmitButton>
+        </SubmitButton> */}
         <FormMessage message={searchParams} />
       </div>
     </form>
