@@ -6,7 +6,7 @@ export default function SignUpUserSteps() {
   return (
     <ol className="flex flex-col gap-6">
       {process.env.VERCEL_ENV === "preview" ||
-      process.env.VERCEL_ENV === "production" ? (
+        process.env.VERCEL_ENV === "production" ? (
         <TutorialStep title="Set up redirect urls">
           <p>It looks like this App is hosted on Vercel.</p>
           <p className="mt-4">
@@ -70,7 +70,7 @@ export default function SignUpUserSteps() {
           </Link>
         </TutorialStep>
       ) : null}
-      <TutorialStep title="Sign up your first user">
+      {/* <TutorialStep title="Sign up your first user">
         <p>
           Head over to the{" "}
           <Link
@@ -81,6 +81,20 @@ export default function SignUpUserSteps() {
           </Link>{" "}
           page and sign up your first user. It's okay if this is just you for
           now. Your awesome idea will have plenty of users later!
+        </p>
+      </TutorialStep> */}
+      <TutorialStep title="See sample notes data from Supabase">
+        <p>
+          Head over to the{" "}
+          <Link
+            href="/notes"
+            className="font-bold hover:underline text-foreground/80"
+          >
+            Notes
+          </Link>{" "}
+          page and see the sample notes data from Supabase. You can add, edit,
+          and delete notes from this page. This is a great way to test that your
+          Supabase database is working correctly.
         </p>
       </TutorialStep>
     </ol>
