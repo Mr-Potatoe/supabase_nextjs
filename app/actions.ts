@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const fullName = formData.get("full_name")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -24,6 +25,9 @@ export const signUpAction = async (formData: FormData) => {
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        full_name: fullName,
+      },
     },
   });
 
@@ -31,6 +35,16 @@ export const signUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
+    // Create a log entry for the sign-up action
+    try {
+      await supabase.from('logs').insert({
+        action: 'user_signup',
+        metadata: { email },
+      });
+    } catch (logError) {
+      console.error('Failed to create signup log:', logError);
+    }
+    
     return encodedRedirect(
       "success",
       "/sign-up",
@@ -52,8 +66,18 @@ export const signInAction = async (formData: FormData) => {
   if (error) {
     return encodedRedirect("error", "/sign-in", error.message);
   }
+  
+  // Create a log entry for the sign-in action
+  try {
+    await supabase.from('logs').insert({
+      action: 'user_signin',
+      metadata: { email },
+    });
+  } catch (logError) {
+    console.error('Failed to create signin log:', logError);
+  }
 
-  return redirect("/protected");
+  return redirect("/dashboard");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {

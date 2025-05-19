@@ -1,104 +1,195 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+<h1 align="center">Mobile Tracker Web App</h1>
 
 <p align="center">
- The fastest way to build apps with Next.js and Supabase
+ Real-time GPS tracking with geofencing and multi-device support
 </p>
 
 <p align="center">
   <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
+  <a href="#tech-stack"><strong>Tech Stack</strong></a> ·
+  <a href="#database-schema"><strong>Database Schema</strong></a> ·
+  <a href="#setup-and-installation"><strong>Setup and Installation</strong></a> ·
+  <a href="#usage"><strong>Usage</strong></a>
 </p>
 <br/>
 
 ## Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+- **Real-time Location Tracking**
+  - High-accuracy GPS tracking using navigator.geolocation
+  - Battery level monitoring
+  - Configurable tracking intervals
+  - Real-time updates via Supabase Realtime
 
-## Demo
+- **Geofencing & Smart Alerts**
+  - Create custom geofence boundaries
+  - Set radius and location for each alert
+  - Activate/deactivate alerts as needed
+  - Receive notifications when devices enter or exit geofences
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+- **Multi-Device Support**
+  - Track multiple devices under one account
+  - View all device locations on a single map
+  - Individual device history and settings
 
-## Deploy to Vercel
+- **Activity History & Logs**
+  - Detailed location history with timestamps
+  - Activity logs for all actions
+  - Filter history by date and device
+  - Export data in various formats
 
-Vercel deployment will guide you through creating a Supabase account and project.
+- **Privacy & Security**
+  - End-to-end security
+  - Row-Level Security policies in Supabase
+  - User-controlled tracking settings
+  - Secure authentication
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## Tech Stack
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+- **Frontend**
+  - [Next.js](https://nextjs.org) with App Router
+  - [TanStack Query](https://tanstack.com/query) for data fetching and state management
+  - [shadcn/ui](https://ui.shadcn.com/) for UI components
+  - [TailwindCSS](https://tailwindcss.com) for styling
+  - [Leaflet](https://leafletjs.com/) for interactive maps
+  - [Zod](https://zod.dev/) for validation
+  - PWA support with [next-pwa](https://www.npmjs.com/package/next-pwa)
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+- **Backend**
+  - [Supabase](https://supabase.com) for authentication, database, and realtime updates
+  - PostgreSQL database
+  - Row-Level Security policies
+  - Supabase Auth with SSR cookie-based auth
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+## Database Schema
 
-## Clone and run locally
+The application uses the following database tables in Supabase:
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+```sql
+-- Users table (linked to Supabase's built-in auth.users)
+create table profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  full_name text,
+  created_at timestamp with time zone default now()
+);
 
-2. Create a Next.js app using the Supabase Starter template npx command
+-- Location tracking table
+create table locations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  latitude double precision not null,
+  longitude double precision not null,
+  accuracy double precision,
+  battery_level numeric,
+  recorded_at timestamp with time zone default now()
+);
+
+-- Smart alerts / Geofencing table
+create table alerts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  title text not null,
+  description text,
+  latitude double precision,
+  longitude double precision,
+  radius double precision, -- in meters
+  created_at timestamp with time zone default now(),
+  active boolean default true
+);
+
+-- Optional: Track access/activity
+create table logs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  action text,
+  metadata jsonb,
+  created_at timestamp with time zone default now()
+);
+```
+
+## Setup and Installation
+
+1. Clone the repository
 
    ```bash
-   npx create-next-app --example with-supabase with-supabase-app
+   git clone https://github.com/yourusername/mobile-tracker.git
+   cd mobile-tracker
    ```
+
+2. Install dependencies
 
    ```bash
-   yarn create next-app --example with-supabase with-supabase-app
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
    ```
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+3. Create a Supabase project at [https://supabase.com](https://supabase.com)
 
-3. Use `cd` to change into the app's directory
+4. Run the SQL migration in the Supabase SQL editor to create the database schema
+   - Copy the contents of `supabase/migrations/20250519_mobile_tracker_schema.sql`
+   - Paste and run in the Supabase SQL editor
 
-   ```bash
-   cd with-supabase-app
-   ```
-
-4. Rename `.env.example` to `.env.local` and update the following:
+5. Set up environment variables
+   - Rename `.env.example` to `.env.local`
+   - Update with your Supabase project credentials:
 
    ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
    ```
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-
-5. You can now run the Next.js local development server:
+6. Run the development server
 
    ```bash
    npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
    ```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+7. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## Usage
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+### Authentication
 
-## Feedback and issues
+- Create an account or sign in using the login/register pages
+- Authentication is handled by Supabase Auth with secure cookie-based sessions
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+### Dashboard
 
-## More Supabase examples
+- The main dashboard displays a map with your current and historical locations
+- Toggle real-time tracking to start sending your location data
+- View your location history organized by date
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+### Geofence Alerts
+
+- Create alerts by setting a title, description, location, and radius
+- Activate or deactivate alerts as needed
+- Receive notifications when entering or exiting geofenced areas
+
+### Settings
+
+- Update your profile information
+- Configure tracking settings (accuracy, intervals, etc.)
+- View your activity logs
+- Manage data privacy and export options
+
+### PWA Support
+
+- Install the app on your mobile device as a Progressive Web App
+- Access tracking features even with limited connectivity
+- Receive push notifications for alerts (when supported)
+
+## Deployment
+
+This application can be easily deployed to Vercel or any other hosting platform that supports Next.js applications.
+
+1. Push your code to a GitHub repository
+2. Connect your repository to Vercel
+3. Configure the environment variables in the Vercel dashboard
+4. Deploy!
